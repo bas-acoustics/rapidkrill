@@ -212,9 +212,10 @@ def land(logname, lastrow, nrows, platform='Unknown',
         
         # Build email and send 
         logger.info('Sending report to land')
-        if not toml.load('config.toml')['sendgrid']['key'].strip():
+        config     = os.path.join(os.path.dirname(__file__),'config.toml')
+        if not toml.load(config)['sendgrid']['key'].strip():
             raise Exception('No sendgrid key in config.file. Report not sent.')
-        apikey     = toml.load('config.toml')['sendgrid']['key']
+        apikey     = toml.load(config)['sendgrid']['key']
         sg         = sendgrid.SendGridAPIClient(apikey=apikey)                
         content    = Content('text/plain', text)
         attachment = Attachment()
