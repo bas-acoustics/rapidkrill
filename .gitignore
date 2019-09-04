@@ -1,0 +1,10 @@
+# ignore git sync of files in this folder:
+__pycache__/
+.DS_Store
+bin/
+tests/collector/*
+tests/echosounder/*
+log/*
+
+# except this one:
+!README.md

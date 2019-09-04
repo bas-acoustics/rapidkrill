@@ -1,0 +1,10 @@
+[Unit]
+Description=rapidkrill
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/src/rapidkrill/routines/rapidkrill/rk.sh
+
+[Install]
+WantedBy=multi-user.target
