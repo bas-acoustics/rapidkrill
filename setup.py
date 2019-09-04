@@ -11,7 +11,7 @@ setuptools.setup(
     description= "Unsupervised and automated processing package to deliver acoustic-based Krill biomass estimates (RAPIDKRILL)",
     long_description = long_description,
     long_description_content_type = "text/markdown",
-    url = "https://github.com/alejandro-ariza/rapidkrill",
+    url = "https://github.com/bas-acoustics/rapidkrill",
     packages = setuptools.find_packages(),
     classifiers=["Programming Language :: Python :: 3",
                  "License :: OSI Approved :: MIT License",

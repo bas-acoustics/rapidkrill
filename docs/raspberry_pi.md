@@ -72,13 +72,13 @@ On the echosounder PC, right click on the folder where the RAW files
 are written and select share.
 
 ON the raspberry Pi, type a command similar to the following
-(replacing your own username, password, machine name and shared folder
-details:
+(replacing your own username, password, IP address and shared folder
+details of the echosounder PC:
 
 ```
 cd
 mkdir ~/data
-sudo mount -t cifs -o uid=$(id -u),gid=$(id -g),username=username,password=password,vers=1.0 //helium/shared /home/pi/data
+sudo mount -t cifs -o uid=$(id -u),gid=$(id -g),username=username,password=password, //10.0.1.100/shared /home/pi/data
 ```
 
 ## Python installation and setup
