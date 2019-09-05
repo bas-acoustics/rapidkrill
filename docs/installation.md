@@ -12,12 +12,12 @@ By convention, we keep code in a `src` directory:
 # Linux & Mac OS:
 mkdir ~/src
 cd ~/src
-git clone https://github.com/alejandro-ariza/rapidkrill.git
+git clone https://github.com/bas-acoustics/rapidkrill.git
 
 # Windows:
 mkdir C:\src
 cd C:\src
-git clone https://github.com/alejandro-ariza/rapidkrill.git
+git clone https://github.com/bas-acoustics/rapidkrill.git
 ```
 
 ### RapidKrill dependencies
