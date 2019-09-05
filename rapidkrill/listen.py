@@ -136,9 +136,13 @@ def listen(path, calfile=None, platform='Unknown',
                             # Report results
                             report.console(pro)
                             report.log(pro, logname, savepng=savepng)
-                            lastrow = report.land(logname, lastrow, reportrows,
-                                                  platform=platform, 
-                                                  recipient=recipient)
+                            try:
+                                lastrow = report.land(logname, lastrow,
+                                                      reportrows,
+                                                      platform=platform, 
+                                                      recipient=recipient)
+                            except Exception:                                       
+                                logger.error('Failed to send report',exc_info=True)
                             prepro  = rawpile                
                             jdx     = process.next_jdx(pro)
                             rawpile = None
