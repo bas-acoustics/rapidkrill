@@ -41,8 +41,6 @@ Acoustic and NMEA data is extracted using [PyEcholab](https://github.com/CI-CMG/
 
 ![image](/docs/nmea_interpolation.png)
 
-<img src="/docs/nmea_interpolation.png" alt="RAPIDKRILL logo" width="900"/>
-
 RapidKrill looks for GGA, GLL and RMC GPS fixes within the NMEA data and uses the first one available (they are sorted alphabetically). No data quality evaluation is applied to the GPS data. GPS data is then used to calculate the distance travelled and vessel speed. An error will be raised if the vessel speed is calculated to be above 20 knots, `read.py` will fail to read the file and `listen.py` will move onto the next one. This vessel speed value can be changed in `read.nmea`.  
 
 `read.py` also returns flags telling whether or not the file is continuous with a preceding files. E.g, a file is not continuous if a time breach is identified between the preceding and the current file. If so, a new transect number is given and the distance counting starts again from zero. A time breach is calculated as greater than 1.5 times the ping-rate within the file.
@@ -52,7 +50,7 @@ These flags are used by other scripts in the library to allocate results by tran
 ### [process.py](https://github.com/alejandro-ariza/rapidkrill/blob/master/rapidkrill/process.py)
 This script runs a processing routine, based on the swarms identification method developed by Cox (2017) for [Commission for the Conservation of Antarctic Marine Living Resources (CCAMLR)](https://www.ccamlr.org) in the [2019 Area48 Survey](https://github.com/ccamlr/2019Area48Survey/tree/master/acoustic_data), to identify acoustic data attributed to krill. It is based on  : 
 
-![image](https://github.com/alejandro-ariza/rapidkrill/blob/master/docs/process.png)
+![image](/docs/process.png)
 
 The routine is implemented using the open source python toolbox [EchoPy](https://github.com/bas-acoustics/echopy). The processing starts with the removal of strong noise such as intermittent signals from other acoustic instruments (Wang et al. 2016), followed by background noise correction (De Robertis and Higginbottom 2007), and seabed detection. Finally the SHAPES algorithm (Coatzee 2000) was used to identify krill swarms, using the settings indicated in Cox (2017). Acoustic data attributed to krill swarms were integrated from 20 m below the surface to the maximum detection limit in 1 nautical mile long cells, and expressed as Nautical Area Scattering Coefficient (NASC m2 nmi-2). `process.py` returns the same numpy data arrays as in `read.py`, in addition to clean, de-noised and resampled acoustic data identified in the processing workflow.   
 
