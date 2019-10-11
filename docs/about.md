@@ -39,7 +39,9 @@ It reads EK60 SIMRAD RAW files and returns the following Numpy data arrays:
 
 Acoustic and NMEA data is extracted using [PyEcholab](https://github.com/CI-CMG/pyEcholab). Where NMEA datagrams are delayed in time with respect to acoustic datagrams, `read.py` generates a workflow where NMEA packets from preceding files are used in the current file being read, so that NMEA data is properly interpolated to the timestamps of RAW datagrams:
 
-![image](https://github.com/alejandro-ariza/rapidkrill/blob/master/docs/nmea_interpolation.png)
+![image](/docs/nmea_interpolation.png)
+
+<img src="/docs/nmea_interpolation.png" alt="RAPIDKRILL logo" width="900"/>
 
 RapidKrill looks for GGA, GLL and RMC GPS fixes within the NMEA data and uses the first one available (they are sorted alphabetically). No data quality evaluation is applied to the GPS data. GPS data is then used to calculate the distance travelled and vessel speed. An error will be raised if the vessel speed is calculated to be above 20 knots, `read.py` will fail to read the file and `listen.py` will move onto the next one. This vessel speed value can be changed in `read.nmea`.  
 
