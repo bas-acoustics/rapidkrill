@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from geopy.distance import distance
 from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 from echolab2.instruments import EK60
 from echopy import read_calibration as readCAL
 
@@ -169,7 +170,7 @@ def raw(rawfile, channel=120, calfile=None,
     
     return raw
 
-def nmea(ek60, t, preraw=None, maxspeed=20):
+def nmea(ek60, t, preraw=None, maxspeed=25):
     """
     Reads NMEA time, longitude, and latitude, and use these variables to
     compute cumulated distance and speed.
@@ -226,6 +227,15 @@ def nmea(ek60, t, preraw=None, maxspeed=20):
                     LAT        = v['latitude' ]
                     transect   = abs(preraw['transect']) +1
                     continuous = False
+            
+            # filter LON/LAT to smooth out anomalies
+            for i in range(3):        
+                LAT = savgol_filter(LAT, 51, 3)
+                LON = savgol_filter(LON, 51, 3)
+                # TODO: so far, smoothing is applied whether or not the data
+                #       needs to smoothed. Need to find a robust way for
+                #       detecting noisy data, and apply the smoothing after
+                #       warning the user.
             
             # calculate distance in kilometres and nautical miles
             KM = np.zeros(len(LON))*np.nan
@@ -333,7 +343,7 @@ def motion(ek60, t, preraw=None):
     
     # return empty if motion data not found
     if any(v is None for v in shr['SHR'].values()):        
-        logger.warn('Motion data not found')    
+        # logger.warn('Motion data not found')    
         T        = None
         PITCH    = None
         ROLL     = None
