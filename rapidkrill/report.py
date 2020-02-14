@@ -124,6 +124,7 @@ def log(pro, logname, savepng=True):
         pf = rawfiles[0].split('-')[0]
         fn = pd.to_datetime(str(t120[0])).strftime(pf + '-D%Y%m%d-T%H%M%S')
         plt.savefig(path+fn+'.png' ,figsize=(8, 8), dpi=100)
+        plt.close()
            
 def console(pro):
     """
