@@ -111,13 +111,13 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     # get seabed line
     idx                = np.argmax(m120sb, axis=0)
     sbline             = r120[idx]
-    sbline[idx==0]     = np.nan
+    sbline[idx==0]     = np.inf
     sbline             = sbline.reshape(1,-1)
     sbline[sbline>250] = np.nan
     
     # -------------------------------------------------------------------------
     # get mask for non-usable range    
-    m120nu = mSN.fielding(bn120, -80)
+    m120nu = mSN.fielding(bn120, -80)[0]
     
     # -------------------------------------------------------------------------
     # remove unwanted (near-surface & deep data, seabed & non-usable range)
@@ -188,6 +188,8 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     # -------------------------------------------------------------------------
     # return processed data outputs
     m120_ = m120in_ & m120bn_ & m120sh_ & m120swrf_
+    if ~m120_.any():
+        raise Exception('no samples in the Sv array processed by all filters')
     pro = {'rawfiles'       : rawfiles   , # list of rawfiles processed
            'transect'       : transect   , # transect number
            'r120'           : r120       , # range (m)
@@ -219,7 +221,7 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
            'Sa120swr'       : Sa120swr   , # Sa from swarms, resampled (m2 m-2)
            'NASC120swr'     : NASC120swr , # NASC from swarms, resampled (m2 nmi-2)
            'Sv120swrf'      : Sv120swrf  , # Sv with only swarms, resampled, full resolution (dB)         
-           'm120_'          : m120_      } # Sv mask with total data removed
+           'm120_'          : m120_      } # Sv mask indicating valid processed data (where all filters could be applied)
     
     return pro
 
