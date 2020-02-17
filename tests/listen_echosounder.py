@@ -17,7 +17,8 @@ os.chdir(wd)
 # import listen module, and listen for new RAW files in the collector directory
 from rapidkrill.listen import listen
 collector = os.path.join(os.path.dirname(__file__),'collector','')
-listen(collector)
+email = # enter your email address here (string format)
+listen(collector, recipient=email)
 
 # Getting "No new files" all the time? Well, you need to turn on your 
 # echosounder and collect some new RAW files!
