@@ -16,8 +16,8 @@ from rapidkrill import read, process, report
 logger = logging.getLogger()
 logging.config.fileConfig(os.path.join(os.path.dirname(__file__),'logging.conf'))
 
-def listen(path, calfile=None, platform='Unknown',
-           savepng=False, reportrows=10, recipient=None):
+def listen(path, calfile=None, transitspeed=3,
+           platform='Unknown', savepng=False, reportrows=10, recipient=None):
     
     """
     Listen for new raw files. When find a new one, it carries out the following
@@ -29,9 +29,16 @@ def listen(path, calfile=None, platform='Unknown',
     Results are stored in log/.
     
     Args:
-        path    (str): Path to the directory where the RAW files are copied
-                       by the echosounder.
-        calfile (str): Path to the calibration file.        
+        path         (str)       : Path to the directory where the RAW files 
+                                   are copied by the echosounder.
+        calfile      (str)       : Path to the calibration file.  
+        transitspeed (int, float): Minimum speed to consider the platform in 
+                                   transit and proceed to process data (knots).
+        platform     (str)       : Platform name.
+        savepng      (bool)      : Whether or not you want to save a PNG images 
+                                   showing processsed echograms.
+        reportrows   (int)       : number of rows in table reports.
+        recipient    (str)       : recipient email to receive results.
     """
     
     # Check if recipient email has been provided
@@ -106,7 +113,8 @@ def listen(path, calfile=None, platform='Unknown',
                     
                     # Read RAW
                     rawfile = os.path.join(path, new[0])
-                    raw     = read.raw(rawfile, calfile=calfile, preraw=preraw)     
+                    raw     = read.raw(rawfile, transitspeed=transitspeed, 
+                                       calfile=calfile, preraw=preraw)     
                     preraw  = raw.copy()
                     
                     # If raw data is continuous with preceeding data...

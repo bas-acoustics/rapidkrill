@@ -20,7 +20,7 @@ from echopy import read_calibration as readCAL
 logger = logging.getLogger()
 logging.config.fileConfig(os.path.join(os.path.dirname(__file__),'logging.conf'))
 
-def raw(rawfile, channel=120, calfile=None,
+def raw(rawfile, channel=120, transitspeed=3, calfile=None,
         soundspeed=None, absorption=None, preraw=None):
     """
     Read EK60 raw data.
@@ -111,7 +111,7 @@ def raw(rawfile, channel=120, calfile=None,
         
     # -------------------------------------------------------------------------
     # if stationary, turn transect number to negative & resume distances  
-    if (nm[-1]-nm[0]) / (np.float64(t[-1]-t[0])/(1000*60*60)) < 3:
+    if (nm[-1]-nm[0]) / (np.float64(t[-1]-t[0])/(1000*60*60))<transitspeed:
         km -= np.nanmin(km)
         nm -= np.nanmin(nm)
         if preraw is None:

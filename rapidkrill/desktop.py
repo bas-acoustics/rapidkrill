@@ -19,14 +19,19 @@ logger = logging.getLogger()
 logging.config.fileConfig(os.path.join(os.path.dirname(__file__),
                                        '..','rapidkrill','logging.conf'))
 
-def desktop(path, calfile=None, soundspeed=None, absorption=None):
+def desktop(path, calfile=None, transitspeed=3,
+            soundspeed=None, absorption=None):
     """
     RapidKrill desktop application. Runs unsupervised processing  in all the 
     RAW files contained in a directory. Results are stored in log/.
     
     Args:
-        path    (str): Path to the directory containing RAW files.
-        calfile (str): Path to the calibration file.
+        path         (str)       : Path to the directory containing RAW files.
+        calfile      (str)       : Path to the calibration file.
+        transitspeed (int, float): Minimum speed to consider the platform in 
+                                   transit and proceed to process data (knots).
+        soundspeed   (int, float): Sound speed to correct data (m s-1)
+        absorption   (int, float): Water absorption to correct data (dB m-1)
     """
     # Get list of RAW files, and the calibration file
     rawfiles= np.sort(glob.glob(os.path.join(path, '*.raw')))    
@@ -43,7 +48,8 @@ def desktop(path, calfile=None, soundspeed=None, absorption=None):
         try:
             
             # read RAW file
-            raw    = read.raw(rawfile, calfile=calfile,
+            raw    = read.raw(rawfile, calfile=calfile, 
+                              transitspeed=transitspeed,
                               soundspeed=soundspeed, absorption=absorption,
                               preraw=preraw)     
             preraw = raw.copy()
