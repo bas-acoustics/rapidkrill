@@ -118,7 +118,11 @@ if __name__ == "__main__":
             desktop(path, calfile=None)
         else:                
             if os.path.exists(calfile):
-                desktop(path, calfile=calfile)           
+                if calfile.endswith('.toml'):
+                    desktop(path, calfile=calfile)
+                else:
+                    raise Exception(('Path to calibration file must include '+
+                                     'a file with extension \'.toml\''))
             else:
                 raise Exception('Calibration file %s does not exist' % calfile)               
     else:
