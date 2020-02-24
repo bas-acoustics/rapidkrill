@@ -38,29 +38,30 @@ def log(pro, logname, savepng=True):
     """
 
     # Load processed data variables
-    rawfiles   = pro['rawfiles']
-    transect   = pro['transect']
-    t120       = pro['t120'    ]
-    r120       = pro['r120'    ]
-    Sv120      = pro['Sv120'   ]
-    Sv120sw    = pro['Sv120sw' ]
-    t120r      = pro['t120r'   ]
-    nm120r     = pro['nm120r'  ]
-    lon120r    = pro['lon120r' ]
-    lat120r    = pro['lat120r' ]
-    sbline120r = pro['sbliner' ][0,:]  
-    NASC120swr = pro['NASC120swr'][0,:]
-    pc120swr   = pro['pc120swr'][0,:]
+    rawfiles    = pro['rawfiles']
+    transect    = pro['transect']
+    t120        = pro['t120'    ]
+    r120        = pro['r120'    ]
+    Sv120       = pro['Sv120'   ]
+    Sv120sw     = pro['Sv120sw' ]
+    t120r       = pro['t120r'   ]
+    t120intrvls = pro['t120intervals']
+    nm120r      = pro['nm120r'  ]
+    lon120r     = pro['lon120r' ]
+    lat120r     = pro['lat120r' ]
+    sbline120r  = pro['sbliner' ][0,:]  
+    NASC120swr  = pro['NASC120swr'][0,:]
+    pc120swr    = pro['pc120swr'][0,:]
         
     # Build summary results
-    results = {'Time'     : np.array(t120r     [:-1], dtype=str)          ,
-               'Longitude': np.round(lon120r   [:-1] , 5)                 ,
-               'Latitude' : np.round(lat120r   [:-1] , 5)                 ,
-               'Transect' : np.ones(len(t120r  [:-1]), dtype=int)*transect,
-               'Miles'    : nm120r             [:-1]                      ,
-               'Seabed'   : np.round(sbline120r[:-1] , 1)                 ,
-               'NASC'     : np.round(NASC120swr[:-1] , 2)                 ,
-               '% samples': np.round(pc120swr  [:-1] , 1)                 }
+    results = {'Time'     : np.array(t120r      , dtype=str)         ,
+               'Longitude': np.round(lon120r    , 5)                 ,
+               'Latitude' : np.round(lat120r    , 5)                 ,
+               'Transect' : np.ones(len(t120r  ), dtype=int)*transect,
+               'Miles'    : nm120r                                   ,
+               'Seabed'   : np.round(sbline120r , 1)                 ,
+               'NASC'     : np.round(NASC120swr , 2)                 ,
+               '% samples': np.round(pc120swr   , 1)                 }
     results = pd.DataFrame(results, columns= ['Time'     , 'Longitude',
                                               'Latitude' , 'Transect' ,
                                               'Miles'    , 'Seabed'   ,
@@ -93,8 +94,8 @@ def log(pro, logname, savepng=True):
         plt.colorbar(im).set_label('Sv raw (dB re 1m$^{-1}$)')
         plt.gca().set_ylim(270,0)
         plt.gca().set_ylabel('Depth (m)')
-        plt.gca().set_xlim(t120r[0], t120r[-1])
-        plt.gca().set_xticks(t120r[[0,-1]])
+        plt.gca().set_xlim(t120intrvls[0], t120intrvls[-1])
+        plt.gca().set_xticks(t120intrvls[[0,-1]])
         plt.tick_params(labelright=False, labelbottom=False)
     
         # plot processed echogram
@@ -108,15 +109,15 @@ def log(pro, logname, savepng=True):
         ax[0].set_ylabel('Depth (m)')
         
         # overlay distance/NASC info
-        for t, nm, NASC in zip(t120r[:-1], nm120r[:-1], NASC120swr[:-1]):
+        for t, nm, NASC in zip(t120r, nm120r, NASC120swr):
             ax[1].plot([t, t], [0, 1], color=[0,.8,0], linewidth=2)
             ax[1].text(t, .95, ' ' + str(transect) + ': ' + str(round(nm,2)),
                        fontweight='bold', color=[0,.8,0])
             ax[1].text(t, .02, ' ' + str(round(NASC,2)),
                        fontweight='bold', color=[1,0,0])    
         ax[1].set_ylim(0, 1)
-        ax[1].set_xlim(t120r[0], t120r[-1])
-        ax[1].set_xticks(t120r[[0,-1]])
+        ax[1].set_xlim(t120intrvls[0], t120intrvls[-1])
+        ax[1].set_xticks(t120intrvls[[0,-1]])
         ax[1].tick_params(labelright=False)
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%d%b-%H:%M:%S'))
            
@@ -135,11 +136,11 @@ def console(pro):
         pro (dict): processed data output from "process" routine.
     """
     transect = pro['transect'  ]    
-    nm       = pro['nm120r'    ][pro['m120swr_'][0,:]]
-    t        = pro['t120r'     ][pro['m120swr_'][0,:]]
-    sb       = pro['sbliner'   ][0][:-1]
-    NASC     = pro['NASC120swr'][pro['m120swr_']     ]
-    pc       = pro['pc120swr'  ][pro['m120swr_']     ]
+    nm       = pro['nm120r'    ].flatten()#[pro['m120swr_'][0,:]]
+    t        = pro['t120r'     ].flatten()#[pro['m120swr_'][0,:]]
+    sb       = pro['sbliner'   ].flatten()#[0][:-1]
+    NASC     = pro['NASC120swr'].flatten()#[pro['m120swr_']     ]
+    pc       = pro['pc120swr'  ].flatten()#[pro['m120swr_']     ]
     
     # Preallocate table object
     table = io.StringIO()
@@ -227,7 +228,7 @@ def land(logname, lastrow, nrows, platform='Unknown',
         mail       = Mail(sender, subject, recipient, content)
         mail.add_attachment(attachment)               
         response   = sg.client.mail.send.post(request_body=mail.get())
-        if response.status_code is 202:
+        if response.status_code==202:
             logger.info('Report sent')
         else:
             logger.warning('Sending report failed')

@@ -85,14 +85,14 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     # Clean impulse noise      
     Sv120in, m120in_ = mIN.wang(Sv120, thr=(-70,-40), erode=[(3,3)],
                                 dilate=[(7,7)], median=[(7,7)])
-    
+    #TODO: True is valid
     # -------------------------------------------------------------------------
     # estimate and correct background noise       
     p120           = np.arange(len(t120))                
     s120           = np.arange(len(r120))                
     bn120, m120bn_ = gBN.derobertis(Sv120, s120, p120, 5, 20, r120, alpha120)
     Sv120clean     = tf.log(tf.lin(Sv120in) - tf.lin(bn120))
-    
+    #TODO: True is valid
     # -------------------------------------------------------------------------
     # mask low signal-to-noise 
     m120sn             = mSN.derobertis(Sv120clean, bn120, thr=12)
@@ -138,21 +138,23 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     
     # -------------------------------------------------------------------------
     # resample Sv from 20 to 250 m, and every 1nm     
-    r120r                        = np.array([20, 250])
-    nm120r                       = np.arange(jdx[1], nm120[-1],   1) 
-    Sv120swr, pc120swr, m120swr_ = rs.twod(Sv120sw, r120, nm120,
-                                           r120r, nm120r, log=True)
+    r120intervals                     = np.array([20, 250])
+    nm120intervals                    = np.arange(jdx[1], nm120[-1],   1) 
+    Sv120swr, r120r, nm120r, pc120swr = rs.twod(Sv120sw, r120, nm120,
+                                                r120intervals, nm120intervals,
+                                                log=True)
         
     # -------------------------------------------------------------------------
     # remove seabed from pc120swr calculation, only water column is considered
     m120sb_             = m120sb*1.0
     m120sb_[m120sb_==1] = np.nan
-    water               = rs.twod(m120sb_, r120, nm120, r120r, nm120r)[1]
-    pc120swr            = pc120swr/water * 100
+    pc120water          = rs.twod(m120sb_, r120, nm120,
+                                  r120intervals, nm120intervals)[3]
+    pc120swr            = pc120swr/pc120water * 100
     
     # -------------------------------------------------------------------------
     # resample seabed line every 1nm
-    sbliner = rs.oned(sbline, nm120, nm120r)[0]
+    sbliner = rs.oned(sbline, nm120, nm120intervals, 1)[0]
     
     # -------------------------------------------------------------------------
     # get time resampled, interpolated from distance resampled
@@ -161,6 +163,9 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     f      = interp1d(nm120, t120f)
     t120rf = f(nm120r)
     t120r  = np.array(t120rf, dtype='timedelta64[ms]') + epoch
+    
+    t120intervalsf = f(nm120intervals)
+    t120intervals  = np.array(t120intervalsf, dtype='timedelta64[ms]') + epoch
     
     # -------------------------------------------------------------------------
     # get latitude & longitude resampled, interpolated from time resampled
@@ -171,8 +176,10 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     
     # -------------------------------------------------------------------------
     # resample back to full resolution  
-    Sv120swrf, m120swrf_   = rs.full(Sv120swr, r120r, nm120r, r120, nm120)
-
+    Sv120swrf, m120swrf_   = rs.full(Sv120swr, r120intervals, nm120intervals, 
+                                     r120, nm120)
+    #TODO: True is valid
+    
     # -------------------------------------------------------------------------
     # compute Sa and NASC from 20 to 250 m or down to the seabed depth
     Sa120swr   = np.zeros_like(Sv120swr)*np.nan
@@ -187,9 +194,9 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
     
     # -------------------------------------------------------------------------
     # return processed data outputs
-    m120_ = m120in_ & m120bn_ & m120sh_ & m120swrf_
-    if ~m120_.any():
-        raise Exception('no samples in the Sv array processed by all filters')
+    m120_ = m120in_ | m120bn_ | m120sh_ | m120swrf_
+    #TODO: True is valid
+
     pro = {'rawfiles'       : rawfiles   , # list of rawfiles processed
            'transect'       : transect   , # transect number
            'r120'           : r120       , # range (m)
@@ -211,13 +218,15 @@ def ccamlr(raw, prepro=None, jdx=[0,0]):
            'Sv120clean'     : Sv120clean , # Sv without background noise (dB)          
            'Sv120sw'        : Sv120sw    , # Sv with only swarms (dB)
            'nm120r'         : nm120r     , # Distance resampled (nmi)
+           'r120intervals'  : r120intervals, # r resampling intervals
+           'nm120intervals' : nm120intervals, # nmi resampling intervals
+           't120intervals'  : t120intervals, # t resampling intervals
            'sbliner'        : sbliner    , # Seabed resampled (m)
            't120r'          : t120r      , # Time resampled (numpy.datetime64)
            'lon120r'        : lon120r    , # Longitude resampled (deg)
            'lat120r'        : lat120r    , # Latitude resampled (deg)
            'Sv120swr'       : Sv120swr   , # Sv with only swarms resampled (dB)
            'pc120swr'       : pc120swr   , # Valid samples used to compute Sv120swr (%)
-           'm120swr_'       : m120swr_   , # mask indicating valid resampled values
            'Sa120swr'       : Sa120swr   , # Sa from swarms, resampled (m2 m-2)
            'NASC120swr'     : NASC120swr , # NASC from swarms, resampled (m2 nmi-2)
            'Sv120swrf'      : Sv120swrf  , # Sv with only swarms, resampled, full resolution (dB)         
@@ -265,9 +274,10 @@ def next_jdx(pro):
         · -> timestamp grid    
     """    
     
-    jbool = np.sum(pro['m120_'], axis=0)>1       
-    jdx0 = np.where(jbool)[0][-1] - np.where(jbool)[0][0] - len(jbool) + 1
-    jdx1 = pro['nm120r'][-1]
-    jdx  = [jdx0, jdx1] 
+    # jbool = np.sum(pro['m120_'], axis=0)>1 
+    jbool = pro['m120_'].all(axis=0)          
+    jdx0  = np.where(~jbool)[0][-1] - np.where(~jbool)[0][0] - len(jbool) + 1
+    jdx1  = pro['nm120intervals'][-1]
+    jdx   = [jdx0, jdx1] 
     
     return jdx 

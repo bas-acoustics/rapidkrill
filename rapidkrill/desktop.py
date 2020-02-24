@@ -35,7 +35,7 @@ def desktop(path, calfile=None, transitspeed=3,
     """
     # Get list of RAW files, and the calibration file
     rawfiles= np.sort(glob.glob(os.path.join(path, '*.raw')))    
-    if rawfiles.size is 0:
+    if rawfiles.size==0:
         raise Exception('No RAW files in directory %s' % path)
     
     # Preallocate variables and iterate through RAW files
