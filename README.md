@@ -22,8 +22,8 @@ Further information:
 * [Tutorial](/docs/tutorial.md).
 
 ## Authors
-* **Alejandro Ariza** - *British Antarctic Survey* - [alejandroariza](https://bitbucket.org/alejandroariza/)
-* **Robert Blackwell** - *British Antarctic Survey* - [RobertBlackwell](https://bitbucket.org/RobertBlackwell)
+* **Alejandro Ariza** - *British Antarctic Survey* - [github](https://github.com/alejandro-ariza)
+* **Robert Blackwell** - *British Antarctic Survey* - [github](https://github.com/RobBlackwell)
 * **Sophie Fielding** - *British Antarctic Survey* 
 
 ## Acknowledgements
